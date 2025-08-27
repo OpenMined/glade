@@ -1,0 +1,1 @@
+cd rust && cargo fmt && cargo clippy && cargo test
