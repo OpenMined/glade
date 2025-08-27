@@ -47,14 +47,14 @@ jobs:
 
       - name: Check formatting
         if: matrix.os != 'windows-latest'
-        run: cd cli && cargo fmt -- --check
+        run: cd rust && cargo fmt -- --check
 
       - name: Run clippy
         if: matrix.os != 'windows-latest'
-        run: cd cli && cargo clippy -- -D warnings
+        run: cd rust && cargo clippy -- -D warnings
 
       - name: Run tests
-        run: cd cli && cargo test --verbose
+        run: cd rust && cargo test --verbose
 
       - name: Build
-        run: cd cli && cargo build --verbose
+        run: cd rust && cargo build --verbose

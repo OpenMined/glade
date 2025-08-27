@@ -105,7 +105,7 @@ impl Downloader {
 }
 
 pub fn parse_md5_file(md5_content: &str) -> Result<(String, String)> {
-    let parts: Vec<&str> = md5_content.trim().split_whitespace().collect();
+    let parts: Vec<&str> = md5_content.split_whitespace().collect();
 
     if parts.len() < 2 {
         return Err(anyhow::anyhow!("Invalid MD5 file format").into());
@@ -114,7 +114,7 @@ pub fn parse_md5_file(md5_content: &str) -> Result<(String, String)> {
     let md5_hash = parts[0].to_string();
     let path = parts[1].to_string();
 
-    if let Some(filename) = path.split('/').last() {
+    if let Some(filename) = path.split('/').next_back() {
         if filename.contains("_") {
             let date_parts: Vec<&str> = filename.split('_').collect();
             for part in date_parts {
@@ -132,24 +132,25 @@ pub fn parse_md5_file(md5_content: &str) -> Result<(String, String)> {
 
 pub fn calculate_md5(path: &Path) -> Result<String> {
     use std::io::Read;
-    
+
     let mut file = fs::File::open(path)
         .with_context(|| format!("Failed to open file for MD5: {}", path.display()))?;
-    
+
     let mut context = md5::Context::new();
     let mut buffer = [0; 8192];
-    
+
     loop {
-        let bytes_read = file.read(&mut buffer)
+        let bytes_read = file
+            .read(&mut buffer)
             .with_context(|| format!("Failed to read file for MD5: {}", path.display()))?;
-        
+
         if bytes_read == 0 {
             break;
         }
-        
+
         context.consume(&buffer[..bytes_read]);
     }
-    
+
     Ok(format!("{:x}", context.compute()))
 }
 

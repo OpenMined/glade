@@ -22,17 +22,32 @@ pub extern "C" fn glade_new() -> *mut GladeDatabase {
     }
 }
 
+/// Free a GladeDatabase instance.
+///
+/// # Safety
+///
+/// The caller must ensure that:
+/// - `ptr` was created by `glade_new()`
+/// - `ptr` has not been freed already
+/// - No other references to `ptr` exist
 #[no_mangle]
-pub extern "C" fn glade_free(ptr: *mut GladeDatabase) {
+pub unsafe extern "C" fn glade_free(ptr: *mut GladeDatabase) {
     if !ptr.is_null() {
-        unsafe {
-            let _ = Box::from_raw(ptr);
-        }
+        let _ = Box::from_raw(ptr);
     }
 }
 
+/// Download a database with the specified name and genome version.
+///
+/// # Safety
+///
+/// The caller must ensure that:
+/// - `ptr` is a valid pointer created by `glade_new()`
+/// - `db_name` is a valid null-terminated C string
+/// - `genome_version` is a valid null-terminated C string
+/// - All pointers remain valid for the duration of the call
 #[no_mangle]
-pub extern "C" fn glade_download_database(
+pub unsafe extern "C" fn glade_download_database(
     ptr: *mut GladeDatabase,
     db_name: *const std::os::raw::c_char,
     genome_version: *const std::os::raw::c_char,
@@ -41,27 +56,25 @@ pub extern "C" fn glade_download_database(
         return -1;
     }
 
-    unsafe {
-        let db_name_str = match std::ffi::CStr::from_ptr(db_name).to_str() {
-            Ok(s) => s,
-            Err(_) => return -1,
-        };
+    let db_name_str = match std::ffi::CStr::from_ptr(db_name).to_str() {
+        Ok(s) => s,
+        Err(_) => return -1,
+    };
 
-        let genome_version_str = match std::ffi::CStr::from_ptr(genome_version).to_str() {
-            Ok(s) => s,
-            Err(_) => return -1,
-        };
+    let genome_version_str = match std::ffi::CStr::from_ptr(genome_version).to_str() {
+        Ok(s) => s,
+        Err(_) => return -1,
+    };
 
-        let database = &(*ptr).manager;
+    let database = &(*ptr).manager;
 
-        let runtime = match tokio::runtime::Runtime::new() {
-            Ok(rt) => rt,
-            Err(_) => return -1,
-        };
+    let runtime = match tokio::runtime::Runtime::new() {
+        Ok(rt) => rt,
+        Err(_) => return -1,
+    };
 
-        match runtime.block_on(database.download_database(db_name_str, genome_version_str)) {
-            Ok(_) => 0,
-            Err(_) => -1,
-        }
+    match runtime.block_on(database.download_database(db_name_str, genome_version_str)) {
+        Ok(_) => 0,
+        Err(_) => -1,
     }
 }
