@@ -15,10 +15,10 @@ cd notebooks
 ./jupyter.sh
 ```
 
-3. Run the Jupyter notebooks in sequence:
-1. `notebooks/1_download.ipynb`
-2. `notebooks/2_check_positions.ipynb`
-3. `notebooks/3_clinvar_filter.ipynb`
+3. Run the Jupyter notebooks in sequence:  
+    - `notebooks/1_download.ipynb`
+    - `notebooks/2_check_positions.ipynb`
+    - `notebooks/3_clinvar_filter.ipynb`
 
 4. Output is in:  
 ```bash
